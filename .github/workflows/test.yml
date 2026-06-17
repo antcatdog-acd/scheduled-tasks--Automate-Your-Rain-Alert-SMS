@@ -1,7 +1,9 @@
 name: Test Setup
 
 on:
-  workflow_dispatch:  # Manual trigger only
+  workflow_dispatch:  # กดรันทดสอบเองด้วยมือได้ตลอดเวลา
+  pull_request:       # รันอัตโนมัติเมื่อมีการทดลองส่งโค้ดใหม่เข้ามา
+    branches: [ "main" ]
 
 jobs:
   test:
@@ -14,7 +16,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: '3.12' # ใช้เวอร์ชันเดียวกับตัวรันจริง
 
       - name: Install dependencies
         run: |
@@ -23,58 +25,56 @@ jobs:
 
       - name: Check secrets are configured
         env:
-          MY_EMAIL: ${{ secrets.MY_EMAIL }}
-          MY_PASSWORD: ${{ secrets.MY_PASSWORD }}
+          # เปลี่ยนมาเช็คคีย์ 3 ตัวที่ใช้ใน scheduled.yml จริงของคุณ
+          OWM_API_KEY: ${{ secrets.OWM_API_KEY }}
+          ACCOUNT_SID: ${{ secrets.ACCOUNT_SID }}
+          AUTH_TOKEN: ${{ secrets.AUTH_TOKEN }}
         run: |
-          if [ -z "$MY_EMAIL" ]; then
-            echo "MY_EMAIL secret is not set!"
-            echo "Go to Settings > Secrets > Actions and add it."
+          if [ -z "$OWM_API_KEY" ]; then
+            echo "❌ OWM_API_KEY secret is not set!"
             exit 1
           else
-            echo "MY_EMAIL is configured"
+            echo "✅ OWM_API_KEY is configured"
           fi
 
-          if [ -z "$MY_PASSWORD" ]; then
-            echo "MY_PASSWORD secret is not set!"
-            echo "Go to Settings > Secrets > Actions and add it."
+          if [ -z "$ACCOUNT_SID" ]; then
+            echo "❌ ACCOUNT_SID secret is not set!"
             exit 1
           else
-            echo "MY_PASSWORD is configured"
+            echo "✅ ACCOUNT_SID is configured"
           fi
 
-          echo ""
-          echo "All secrets are configured!"
+          if [ -z "$AUTH_TOKEN" ]; then
+            echo "❌ AUTH_TOKEN secret is not set!"
+            exit 1
+          else
+            echo "✅ AUTH_TOKEN is configured"
+          fi
+
+          echo "🎉 All required secrets are configured!"
 
       - name: Check required files exist
         run: |
           echo "Checking for required files..."
 
           if [ -f "main.py" ]; then
-            echo "main.py found"
+            echo "✅ main.py found"
           else
-            echo "main.py not found!"
+            echo "❌ main.py not found!"
             exit 1
           fi
 
           if [ -f "requirements.txt" ]; then
-            echo "requirements.txt found"
+            echo "✅ requirements.txt found"
           else
-            echo "requirements.txt not found!"
+            echo "❌ requirements.txt not found!"
             exit 1
           fi
 
-          if [ -f "birthdays.csv" ]; then
-            echo "birthdays.csv found"
-          else
-            echo "birthdays.csv not found!"
-            exit 1
-          fi
-
-          echo ""
-          echo "All required files found!"
+          echo "🎉 All required files found!"
 
       - name: Test Python syntax
-        run: python -m py_compile main.py && echo "Python syntax OK"
+        run: python -m py_compile main.py && echo "✅ Python syntax OK (No syntax errors)"
 
       - name: Success
         run: |
