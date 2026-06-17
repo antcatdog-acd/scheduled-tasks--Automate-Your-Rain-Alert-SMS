@@ -30,9 +30,10 @@ for hour_data in weather_data["list"]:
         will_rain = True
 
 if will_rain:
-    proxy_client = TwilioHttpClient()
-    proxy_client.session.proxies = {'https': os.environ['https_proxy']}
-    client = Client(account_sid, auth_token, http_client=proxy_client)
+    # proxy_client = TwilioHttpClient()
+    # proxy_client.session.proxies = {'https': os.environ['https_proxy']}
+    # client = Client(account_sid, auth_token, http_client=proxy_client)
+    client = Client(account_sid, auth_token)
     message = client.messages.create(
         from_="whatsapp:+14155238886",
         body="It's going to rain today. Remember to bring an umbrella",
